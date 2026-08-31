@@ -1,0 +1,8 @@
+{
+  "liveness_accuracy": 1.0,
+  "n_samples": 294859,
+  "is_synthetic": false,
+  "segmentation_available": false,
+  "note": "RGBE-Gaze H5 currently contains genuine samples only. This accuracy is NOT a genuine-vs-replay liveness benchmark. Replay/attack samples are required for valid APCER, BPCER and ACER.",
+  "backbone": "conv_gru_fallback"
+}

@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Space Grotesk", "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-base-950: #030712;
+  --color-base-900: #050A14;
+  --color-base-800: #07111F;
+  
+  --color-accent: #00E5FF;
+  --color-secondary: #7C3AED;
+  --color-info: #2563EB;
+  
+  --color-success: #00F5A0;
+  --color-warning: #FFC857;
+  --color-danger: #FF4567;
+}
+
+@layer base {
+  body {
+    @apply bg-base-950 text-white antialiased overflow-x-hidden;
+    font-family: var(--font-sans);
+  }
+}
+
+/* Utilities for animations and specific styles */
+@layer utilities {
+  .glass-panel {
+    @apply bg-base-900/40 backdrop-blur-md border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/50;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-white/20;
+}
+
+/* Animations */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+  50% { opacity: 1; box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Custom Recharts Tooltip */
+.recharts-default-tooltip {
+  @apply !bg-base-900/80 !backdrop-blur-md !border !border-white/10 !rounded-lg !text-white;
+}
+.recharts-tooltip-item {
+  @apply !text-accent;
+}

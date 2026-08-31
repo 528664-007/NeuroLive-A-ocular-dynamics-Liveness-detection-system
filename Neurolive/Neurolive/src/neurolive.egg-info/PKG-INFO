@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: neurolive
+Version: 0.1.0
+Summary: Event-camera liveness detection — final-year project extending Mastropasqua et al. 2026
+Requires-Python: >=3.10

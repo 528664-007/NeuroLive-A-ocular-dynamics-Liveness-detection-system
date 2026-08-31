@@ -1,0 +1,12 @@
+{
+  "scnn_liveness_accuracy": 1.0,
+  "scnn_liveness_acer": {
+    "apcer": NaN,
+    "bpcer": 0.0,
+    "acer": NaN
+  },
+  "num_evaluated_samples": 294859,
+  "note": "This dataset currently contains genuine RGBE-Gaze samples only. Therefore liveness accuracy/ACER is NOT a valid genuine-vs-replay benchmark until attack/replay samples are added.",
+  "is_synthetic": false,
+  "segmentation_available": false
+}
