@@ -251,8 +251,7 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for details. *(Confi
 
 ## 📬 Contact
 
-**Sameer** — Computer Vision Research Lead
-*(Add your preferred contact method — email, LinkedIn, etc. — here before publishing.)*
+**Sameer** — sameerfayaz1028@gmail.com
 
 <div align="center">
 
