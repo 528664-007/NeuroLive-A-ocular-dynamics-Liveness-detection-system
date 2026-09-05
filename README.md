@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧿 NeuroLive
+# 🧿 CanthusCore
 
 ### Event-Camera-Inspired Liveness Detection with a Unified Joint Architecture
 
@@ -21,6 +21,7 @@
 [Status](#-current-status) •
 [Getting Started](#-getting-started) •
 [Tech Stack](#-tech-stack) •
+[Outputs](#-outputs) •
 [FAQ](#-faq) •
 [Paper](#-research-background)
 
@@ -272,6 +273,11 @@ Not yet, and this README says so directly rather than around it — see [Current
 Because no event camera was available for this project. The webcam path is a clearly-labeled approximation (frame-differencing simulates events) built so the architecture, protocol, and interface could all be developed and functionally validated without waiting on hardware access — see the [Roadmap](#-roadmap) for closing that gap.
 
 ---
+## Outputs
+<img width="1822" height="933" alt="image" src="https://github.com/user-attachments/assets/ac6f8ad7-c561-41cf-b3c5-f37bbef66a88" />
+<img width="1386" height="859" alt="image" src="https://github.com/user-attachments/assets/fbe8ffc0-a546-47f3-9d2f-6c823c391d6f" />
+
+
 
 ## 📚 Research Background
 
