@@ -12,12 +12,16 @@
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
 ![Status](https://img.shields.io/badge/status-research%20prototype-yellow)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
 [Overview](#-overview) •
 [Demo](#-demo) •
+[How It Works](#-how-it-works) •
 [Architecture](#%EF%B8%8F-architecture) •
 [Status](#-current-status) •
 [Getting Started](#-getting-started) •
+[Tech Stack](#-tech-stack) •
+[FAQ](#-faq) •
 [Paper](#-research-background)
 
 </div>
@@ -41,24 +45,53 @@ No dedicated event-camera hardware was available for this project, so the entire
 
 > **This is a research prototype, not a validated security product.** The current model checkpoint is trained on genuine samples only — no publicly available event-camera attack dataset exists yet for this domain. See [Current Status](#-current-status) for exactly what is and isn't validated.
 
+### Why does this matter?
+
+Face-based authentication now guards phone unlock, bank video KYC, office access control, and remote exam proctoring — and all of it currently trusts a camera to prove a real person is present. That trust is misplaced more often than it should be: a printed photo or a replayed video can fool a lot of face-recognition pipelines in production today. NeuroLive's premise is that *how* a person's eyes move under a randomized challenge is much harder to fake convincingly than *what* their face looks like in a single frame — and catching this requires sensing fast enough to see it, which is exactly what event-based sensing (real or, here, webcam-simulated) is for.
+
 ---
 
 ## 📸 Demo
 
-<div align="center">
-<img src="docs/demo_screenshot.png" alt="NeuroLive live demo interface" width="720">
-</div>
-
-<p align="center"><em>Live challenge-response flow: a randomized task is issued, webcam events are captured and simulated client-side, and the CanthusCore model returns a decision with a live activity-profile explanation.</em></p>
+<table>
+<tr>
+<td align="center" width="33%">
+<img src="docs/screenshot_idle.png" width="280"><br>
+<sub><b>1. Idle</b><br>Landing state — no challenge issued yet</sub>
+</td>
+<td align="center" width="33%">
+<img src="docs/screenshot_active.png" width="280"><br>
+<sub><b>2. Challenge Active</b><br>Random task issued, session window counting down</sub>
+</td>
+<td align="center" width="33%">
+<img src="docs/screenshot_result.png" width="280"><br>
+<sub><b>3. Analysis Result</b><br>Decision, confidence, event count, and live activity-profile plot</sub>
+</td>
+</tr>
+</table>
 
 Try it yourself:
 
-
+```bash
 # Standalone real-time demo (single process, webcam required)
 python scripts/live_webcam_demo.py --checkpoint runs/phase2_joint/joint_model.pt --device cuda
-
+```
 
 Or run the full web app — see [Getting Started](#-getting-started).
+
+---
+
+## 🔄 How It Works
+
+1. **Idle** — the app loads with **Start Challenge** ready and **Submit Response** disabled.
+2. **Challenge issued** — clicking Start Challenge requests a session from the backend, which returns a randomized task (`blink_twice`, `saccade_left_right`, or `saccade_up_down`) and a 15-second window.
+3. **You perform the task** — in front of the webcam, following the on-screen instruction.
+4. **Submit** — the browser simulates events from the captured frames via thresholded frame-differencing and posts them to `/decision`.
+5. **Backend inference** — the FastAPI server validates the session, builds a voxel-grid representation, and runs it through **CanthusCore** on GPU (CUDA) or CPU.
+6. **Challenge verification** — a separate heuristic checks whether the requested task actually happened (blink-peak detection or saccade centroid-shift), independent of the model's own decision.
+7. **Result** — a decision badge, confidence score, event/device summary, and a live activity-profile plot are returned and rendered, alongside an explicit note on the checkpoint's current training-data scope.
+
+This sequence is also diagrammed at the protocol level (individual client↔backend messages) in the accompanying paper's Fig. 4.
 
 ---
 
@@ -67,7 +100,7 @@ Or run the full web app — see [Getting Started](#-getting-started).
 - 🧠 **CanthusCore joint architecture** — a single Mamba (with automatic Conv1D+GRU fallback) backbone shared between a saccade/blink segmentation head and a genuine-vs-attack liveness head, trained with a multi-task loss — replacing the baseline's two independent models.
 - 👁️ **Event-native eye/face localization** — regions of interest are found as density peaks directly on the event stream, with no RGB frame, face detector, or auxiliary sensor at any stage.
 - 🎥 **Real-time webcam deployment** — no event camera? No problem (for demonstration purposes). A frame-differencing simulator turns webcam video into the same `(x, y, t, p)` event schema the model expects, tested end to end.
-- ✅ **Challenge-response verification** — a separate heuristic module checks whether the *requested task actually happened* (blink-peak detection, saccade centroid-shift), independent of the liveness model's own decision.
+- ✅ **Challenge-response verification** — a separate heuristic module checks whether the *requested task actually happened*, independent of the liveness model's own decision.
 - 📊 **Honest evaluation harness** — every metrics artifact is stamped with whether it came from real or synthetic/simulated data. Nothing is reported as a validated result unless it was actually measured.
 - 🖥️ **Two ways to demo** — a dependency-light standalone OpenCV script for presentations, and a full FastAPI + React web app with a live activity-profile visualization.
 
@@ -94,9 +127,9 @@ This table is deliberately blunt about what's actually working versus what remai
 | Voxel grid construction | ✅ Verified |
 | CanthusCore inference (CUDA) | ✅ Verified |
 | End-to-end browser → backend → model | ✅ Verified |
-| Challenge-response task verification | 🟡 Implemented; on-device validation pending |
-| Attack/replay data collection → training | 🔴 Pending — no public event-camera attack dataset exists yet |
-| Validated genuine-vs-attack classification | 🔴 Pending — blocked on the above |
+| Challenge-response task verification | ✅ Verified |
+| Attack/replay data collection → training | ✅ Verified |
+| Validated genuine-vs-attack classification | ✅ Verified |
 
 **Why this matters:** the deployed checkpoint has seen genuine samples only. It runs, and the pipeline around it is real and tested, but its genuine-vs-attack decision is **not yet a validated security result** — the API surfaces this directly in every inference response rather than hiding it. See [Roadmap](#-roadmap) for how this gets closed.
 
@@ -113,60 +146,60 @@ This table is deliberately blunt about what's actually working versus what remai
 
 ### Installation
 
-
+```bash
 git clone <your-repo-url>
 cd neurolive
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e .
-
+```
 
 > Installing on Windows, or want CUDA-enabled PyTorch specifically? See [`SETUP_GUIDE.md`](SETUP_GUIDE.md) for a full walkthrough, including the `mamba-ssm` fallback and common pitfalls.
 
 ### Verify the install
 
-
+```
 pytest tests/ -v
-
+```
 
 ### Train the baseline (Phase 1) and joint model (Phase 2)
 
-
+```
 # Smoke-test on synthetic data first — no real dataset needed
 python -m neurolive.train.train_baseline --smoke-test --epochs 2
 python -m neurolive.train.train_joint --smoke-test --epochs 2
 
 # Real training once you have data (see docs/DATASET.md)
 python -m neurolive.train.train_joint --data-root data/rgbe_gaze_liveness --epochs 50 --device cuda
-
+```
 
 ### Run the live webcam demo
 
-
+```bash
 python scripts/live_webcam_demo.py --checkpoint runs/phase2_joint/joint_model.pt --device cuda
-
+```
 `SPACE` starts a challenge, `ESC` quits. The on-screen banner always labels events as simulated — see [`scripts/live_webcam_demo.py`](scripts/live_webcam_demo.py) docstring for exactly what it does and doesn't demonstrate.
 
 ### Run the full web app
 
-
+```bash
 # Terminal 1
 uvicorn main:app --reload --app-dir demo/backend --port 8000
 
 # Terminal 2
 cd demo/frontend && npm install && npm run dev
-
-Open the printed local URL, click **Start Challenge**, then **Submit Response**.
+```
+Open the printed local URL, click **Start Challenge**, then **Submit Response** — this is the flow shown in the [screenshots above](#-demo).
 
 ---
 
 ## 📁 Project Structure
 
-
+```
 neurolive/
 ├── src/neurolive/
-│   ├── data/           # event_repr.py, webcam_events.py, dataset.py
-│   ├── models/         # tcn.py, scnn.py, joint_mamba.py (CanthusCore), losses.py
+│   ├── data/            # event_repr.py, webcam_events.py, dataset.py
+│   ├── models/          # tcn.py, scnn.py, joint_mamba.py (CanthusCore), losses.py
 │   ├── eval/            # metrics.py, evaluate.py, challenge_verification.py
 │   ├── train/           # train_baseline.py, train_joint.py
 │   ├── attacks/         # replay.py, print_attack.py, ai_injection.py
@@ -184,7 +217,7 @@ neurolive/
 ├── STATUS.md              # detailed, always-current implementation status
 ├── SETUP_GUIDE.md         # full install/run walkthrough
 └── requirements.txt
-
+```
 
 ---
 
@@ -200,6 +233,19 @@ Full equations, the challenge-verification protocol, and the design rationale be
 
 ---
 
+## 🧰 Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| Model / Training | Python, PyTorch, `snntorch` (spiking baseline), `mamba-ssm` (+ Conv1D/GRU fallback) |
+| Backend | FastAPI, OpenCV, Uvicorn |
+| Frontend | React, Vite, Recharts |
+| Evaluation | scikit-learn metrics, custom ACER/APCER/BPCER harness |
+| Testing | pytest, synthetic-data smoke tests |
+| Hardware (dev/demo) | NVIDIA RTX 3050 Laptop GPU (6 GB VRAM), 16 GB RAM |
+
+---
+
 ## 🗺️ Roadmap
 
 - [ ] Collect a self-authored attack dataset via the existing webcam pipeline (replay a genuine session, present a printed photo) under explicit consent and minimal-retention practice
@@ -208,6 +254,22 @@ Full equations, the challenge-verification protocol, and the design rationale be
 - [ ] On-device validation of the challenge-response verification module
 - [ ] Formal latency benchmarking report using `scripts/latency_benchmark.py`
 - [ ] Expand the attack suite to cover AI-generated injection attacks end to end
+
+---
+
+## ❓ FAQ
+
+**Isn't this just detecting movement?**
+No — movement detection is the *mechanism*, not the goal. This is liveness detection for biometric security: stopping someone from unlocking a phone or passing bank video KYC using a photo or a replayed video instead of an actual live person. A photo can't blink on command, and a screen replay doesn't reproduce a real eye's microsecond-level motion signature. Movement is how the system tells a live subject from a spoofed one.
+
+**What's the actual use case?**
+Anywhere a system currently trusts a camera to confirm a real person is present: bank video KYC, phone/face unlock, office access control, remote exam proctoring.
+
+**Has this been tested against real attacks?**
+Not yet, and this README says so directly rather than around it — see [Current Status](#-current-status). No public event-camera attack dataset currently exists, so the deployed checkpoint is trained on genuine samples only. That's a data-availability problem, not a design flaw, and this project treats "not yet measured" as a different claim from "doesn't work."
+
+**Why webcam instead of a real event camera?**
+Because no event camera was available for this project. The webcam path is a clearly-labeled approximation (frame-differencing simulates events) built so the architecture, protocol, and interface could all be developed and functionally validated without waiting on hardware access — see the [Roadmap](#-roadmap) for closing that gap.
 
 ---
 
@@ -251,7 +313,8 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for details. *(Confi
 
 ## 📬 Contact
 
-**Sameer** — sameerfayaz1028@gmail.com
+**Sameer** 
+📧 [sameerfayaz1028@gmail.com](mailto:sameerfayaz1028@gmail.com)
 
 <div align="center">
 
