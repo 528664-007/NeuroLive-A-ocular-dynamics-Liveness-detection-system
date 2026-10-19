@@ -110,7 +110,7 @@ This sequence is also diagrammed at the protocol level (individual client↔back
 ## 🏗️ Architecture
 
 <div align="center">
-<img src="docs/architecture.png" alt="NeuroLive system architecture" width="850">
+<img src="Neurolive/Neurolive/docs/architecture.png" alt="NeuroLive system architecture" width="850">
 </div>
 
 Event data (real or webcam-simulated) is localized to the eye/face region without RGB assistance, converted to a voxel-grid representation, and processed by **CanthusCore** — the shared backbone with two output heads. A challenge-verification stage runs alongside the liveness head before the final decision and its activity-profile explanation are returned. Full technical detail, governing equations, and the design rationale are in the [accompanying paper](#-research-background).
